@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#0D7A5A"/>
+<title>GIDUMAN</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --green:#0D7A5A;
+  --green-light:#16A37A;
+  --green-dim:#E6F5F0;
+  --green-mid:#9FE1CB;
+  --red:#E53E3E;
+  --red-dim:#FFF0F0;
+  --yellow:#D97706;
+  --yellow-dim:#FFFBEB;
+  --blue:#2563EB;
+  --blue-dim:#EFF6FF;
+  --purple:#7C3AED;
+  --purple-dim:#F3F0FF;
+  --bg:#F4F7F5;
+  --card:#FFFFFF;
+  --border:#E8EDE9;
+  --text:#111A15;
+  --text2:#4B6357;
+  --text3:#8FA898;
+  --radius:18px;
+  --radius-sm:12px;
+  --shadow:0 2px 16px rgba(13,122,90,.10);
+  --shadow-lg:0 8px 40px rgba(13,122,90,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);}
+input,select,textarea,button{font-family:'Plus Jakarta Sans',sans-serif;}
+
+/* ===== SCREENS ===== */
+.screen{position:fixed;inset:0;display:none;flex-direction:column;overflow:hidden;}
+.screen.active{display:flex;}
+
+/* ===== AUTH ===== */
+#auth-screen{background:linear-gradient(170deg,#0D7A5A 0%,#0D7A5A 42%,var(--bg) 42%);}
+.auth-hero{padding:max(52px,env(safe-area-inset-top)) 28px 36px;display:flex;flex-direction:column;align-items:center;}
+.auth-logo-ring{width:72px;height:72px;border-radius:22px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin-bottom:14px;backdrop-filter:blur(10px);}
+.auth-logo-ring svg{width:38px;height:38px;}
+.auth-brand{font-size:26px;font-weight:800;color:#fff;letter-spacing:3px;}
+.auth-tagline{font-size:13px;color:rgba(255,255,255,.7);margin-top:4px;font-weight:500;}
+.auth-card{background:var(--card);border-radius:28px 28px 0 0;flex:1;padding:28px 22px;box-shadow:0 -4px 40px rgba(0,0,0,.08);overflow-y:auto;}
+.auth-seg{display:flex;background:#F0F4F2;border-radius:14px;padding:4px;margin-bottom:24px;gap:4px;}
+.auth-seg-btn{flex:1;padding:10px;font-size:14px;font-weight:700;border:none;border-radius:10px;background:transparent;color:var(--text3);cursor:pointer;transition:all .2s;}
+.auth-seg-btn.on{background:#fff;color:var(--green);box-shadow:0 1px 8px rgba(0,0,0,.08);}
+.field{margin-bottom:18px;}
+.field label{font-size:12px;font-weight:700;color:var(--text2);display:block;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase;}
+.field input,.field select{height:52px;padding:0 16px;border:1.5px solid var(--border);background:#FAFCFB;color:var(--text);border-radius:14px;font-size:15px;width:100%;font-weight:500;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--green);background:#fff;box-shadow:0 0 0 3px rgba(13,122,90,.1);}
+.field textarea{width:100%;resize:none;padding:14px 16px;border:1.5px solid var(--border);background:#FAFCFB;color:var(--text);border-radius:14px;font-size:15px;line-height:1.5;font-weight:500;}
+.phone-row{display:flex;gap:8px;}
+.phone-prefix{height:52px;background:#F0F4F2;border:1.5px solid var(--border);border-radius:14px;padding:0 14px;display:flex;align-items:center;font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;flex-shrink:0;gap:6px;}
+.hint{font-size:11px;color:var(--text3);margin-top:6px;font-weight:500;}
+.pwd-wrap{position:relative;}
+.pwd-wrap input{padding-right:52px;}
+.pwd-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:20px;color:var(--text3);padding:4px;width:auto;height:auto;}
+.auth-err{font-size:13px;color:var(--red);background:var(--red-dim);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:none;font-weight:600;}
+.auth-err.show{display:block;}
+.auth-suc{font-size:13px;color:var(--green);background:var(--green-dim);border-radius:12px;padding:12px 16px;margin-bottom:16px;display:none;font-weight:600;}
+.auth-suc.show{display:block;}
+.primary-btn{background:var(--green);color:#fff;border:none;height:54px;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;width:100%;letter-spacing:.3px;margin-top:4px;transition:transform .1s,background .15s;}
+.primary-btn:active{transform:scale(.97);background:var(--green-light);}
+
+/* ===== APP SHELL ===== */
+#app-screen{background:var(--bg);}
+.app-header{background:var(--green);padding:max(14px,env(safe-area-inset-top)) 20px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.header-left{display:flex;flex-direction:column;}
+.header-brand{font-size:19px;font-weight:800;color:#fff;letter-spacing:2px;}
+.header-user{font-size:12px;color:rgba(255,255,255,.7);margin-top:1px;font-weight:500;}
+.header-right{display:flex;align-items:center;gap:8px;}
+.stat-pill{background:rgba(255,255,255,.15);border-radius:999px;padding:5px 12px;font-size:12px;color:#fff;font-weight:700;}
+.logout-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:10px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;}
+.logout-btn:active{background:rgba(255,255,255,.25);}
+
+/* ===== CONTENT AREA ===== */
+.app-content{flex:1;overflow:hidden;position:relative;}
+.tab-screen{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;padding:16px 16px calc(84px + env(safe-area-inset-bottom));}
+.tab-screen.active{display:block;}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav{flex-shrink:0;background:var(--card);border-top:1px solid var(--border);display:flex;padding:10px 0 max(10px,env(safe-area-inset-bottom));box-shadow:0 -4px 24px rgba(0,0,0,.06);}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:4px 0;border:none;background:none;color:var(--text3);}
+.nav-item .nav-icon{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:10px;transition:all .2s;font-size:20px;}
+.nav-item .nav-label{font-size:10px;font-weight:700;letter-spacing:.3px;transition:color .2s;}
+.nav-item.on .nav-icon{background:var(--green-dim);}
+.nav-item.on .nav-label{color:var(--green);}
+.nav-item.on svg path,.nav-item.on svg rect,.nav-item.on svg circle{fill:var(--green);}
+
+/* ===== SECTION HEADER ===== */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.sec-title{font-size:18px;font-weight:800;color:var(--text);}
+.sec-sub{font-size:12px;color:var(--text3);margin-top:1px;font-weight:500;}
+
+/* ===== STAT CARDS ===== */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+.stat-card{background:var(--card);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;box-shadow:var(--shadow);}
+.stat-val{font-size:24px;font-weight:800;color:var(--text);line-height:1;}
+.stat-val.green{color:var(--green);}
+.stat-val.red{color:var(--red);}
+.stat-lbl{font-size:10px;color:var(--text3);margin-top:5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+
+/* ===== STUDY SLOTS ===== */
+.slot-card{background:var(--card);border-radius:var(--radius);margin-bottom:14px;box-shadow:var(--shadow);overflow:hidden;}
+.slot-top{display:flex;align-items:center;gap:12px;padding:16px 16px 12px;}
+.slot-emoji{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.slot-info{flex:1;min-width:0;}
+.slot-name{font-size:15px;font-weight:800;color:var(--text);}
+.slot-time-disp{font-size:12px;color:var(--text3);margin-top:2px;font-weight:600;}
+.slot-badge{font-size:11px;padding:4px 11px;border-radius:999px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.slot-body{padding:0 16px 16px;}
+.progress-wrap{height:6px;background:var(--border);border-radius:99px;margin-bottom:14px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--green-light));border-radius:99px;transition:width .4s ease;}
+.time-edit-row{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:12px;padding:10px 12px;margin-bottom:14px;flex-wrap:wrap;}
+.time-edit-row label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+.time-edit-row input[type=time]{flex:1;min-width:90px;height:38px;font-size:14px;padding:0 10px;border:1.5px solid var(--border);border-radius:10px;background:#fff;color:var(--text);font-weight:600;}
+.time-sep{font-size:14px;color:var(--text3);font-weight:700;}
+.time-save-btn{height:38px;padding:0 14px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.subj-row{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg);margin-bottom:8px;}
+.subj-check{width:24px;height:24px;border-radius:8px;border:2px solid var(--green);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.subj-check.on{background:var(--green);border-color:var(--green);}
+.subj-check.on::after{content:'';display:block;width:5px;height:10px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px);}
+.subj-name{flex:1;font-size:14px;font-weight:600;color:var(--text);word-break:break-word;}
+.subj-name.crossed{text-decoration:line-through;color:var(--text3);}
+.subj-dur{font-size:11px;font-weight:700;color:var(--text3);background:var(--border);border-radius:99px;padding:2px 8px;white-space:nowrap;}
+.subj-del{background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;padding:4px;min-width:32px;min-height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;}
+.subj-del:active{color:var(--red);background:var(--red-dim);}
+.add-subj{display:flex;gap:8px;margin-top:10px;}
+.add-subj input{flex:1;min-width:0;height:44px;font-size:14px;padding:0 12px;border:1.5px solid var(--border);border-radius:12px;background:#fff;color:var(--text);font-weight:600;}
+.add-subj input:focus{outline:none;border-color:var(--green);}
+.add-subj input[type=number]{flex:0 0 68px;max-width:68px;}
+.add-subj-btn{height:44px;padding:0 16px;background:var(--green);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;}
+.add-subj-btn:active{background:var(--green-light);}
+.notes-section{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
+.notes-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.notes-ta{width:100%;min-height:80px;font-size:14px;color:var(--text);background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:12px;resize:none;line-height:1.6;font-weight:500;}
+.notes-ta:focus{outline:none;border-color:var(--green);background:#fff;}
+.notes-actions{display:flex;align-items:center;margin-top:8px;gap:10px;}
+.notes-save{height:38px;padding:0 18px;background:none;border:1.5px solid var(--green);color:var(--green);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;}
+.notes-saved{font-size:12px;color:var(--green);font-weight:700;opacity:0;transition:opacity .3s;}
+.notes-saved.show{opacity:1;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px;font-weight:600;}
+.empty-icon{font-size:40px;margin-bottom:10px;}
+
+/* ===== TASKS ===== */
+.add-task-card{background:var(--card);border-radius:var(--radius);padding:18px;margin-bottom:16px;box-shadow:var(--shadow);}
+.add-task-title{font-size:14px;font-weight:700;color:var(--text2);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px;}
+.field-row{display:flex;gap:8px;margin-bottom:12px;}
+.field-row select,.field-row input{flex:1;height:46px;padding:0 12px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);border-radius:12px;font-size:14px;font-weight:600;}
+.field-row select:focus,.field-row input:focus{outline:none;border-color:var(--green);}
+.field-block{display:flex;flex-direction:column;gap:5px;flex:1;}
+.field-block label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;}
+.field-block input,.field-block select{height:46px;padding:0 12px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);border-radius:12px;font-size:14px;font-weight:600;width:100%;}
+.field-block input:focus,.field-block select:focus{outline:none;border-color:var(--green);}
+.task-title-inp{height:52px;padding:0 16px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);border-radius:14px;font-size:15px;font-weight:600;width:100%;margin-bottom:12px;}
+.task-title-inp:focus{outline:none;border-color:var(--green);background:#fff;}
+.task-note-ta{width:100%;resize:none;padding:12px 16px;border:1.5px solid var(--border);background:var(--bg);color:var(--text);border-radius:14px;font-size:14px;line-height:1.5;font-weight:500;min-height:60px;margin-bottom:12px;}
+.task-note-ta:focus{outline:none;border-color:var(--green);background:#fff;}
+.add-task-btn{height:50px;background:var(--green);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;width:100%;}
+.add-task-btn:active{background:var(--green-light);}
+
+.chips-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+.chip{font-size:12px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;font-weight:700;height:auto;}
+.chip.on{background:var(--green);color:#fff;border-color:var(--green);}
+.search-inp{height:44px;flex:1;min-width:120px;font-size:14px;padding:0 14px;border:1.5px solid var(--border);background:var(--card);border-radius:999px;color:var(--text);font-weight:600;}
+.search-inp:focus{outline:none;border-color:var(--green);}
+
+.task-card{background:var(--card);border-radius:var(--radius-sm);padding:16px;margin-bottom:10px;box-shadow:var(--shadow);border:1.5px solid transparent;transition:border-color .15s;}
+.task-card.done-task{opacity:.55;}
+.task-card.overdue{border-color:var(--red);}
+.task-top{display:flex;align-items:flex-start;gap:12px;}
+.chk-btn{flex-shrink:0;cursor:pointer;padding:2px;background:none;border:none;}
+.chk-ring{width:28px;height:28px;border-radius:50%;border:2.5px solid var(--green);background:transparent;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.chk-ring.on{background:var(--green);}
+.chk-ring.on::after{content:'';display:block;width:7px;height:12px;border:2.5px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px);}
+.task-body{flex:1;min-width:0;}
+.task-name{font-size:15px;font-weight:700;color:var(--text);word-break:break-word;}
+.task-name.crossed{text-decoration:line-through;color:var(--text3);}
+.task-note{font-size:13px;color:var(--text2);margin-top:4px;line-height:1.5;word-break:break-word;}
+.task-meta{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center;}
+.badge{font-size:11px;padding:4px 10px;border-radius:999px;font-weight:700;}
+.pri-h{background:#FEE2E2;color:#991B1B;}.pri-m{background:#FEF3C7;color:#92400E;}.pri-l{background:#D1FAE5;color:#065F46;}
+.cat-b{background:var(--bg);color:var(--text2);border:1px solid var(--border);}
+.time-b{font-size:11px;padding:4px 10px;border-radius:999px;background:var(--green-dim);color:#085041;border:1px solid var(--green-mid);font-weight:700;}
+.time-b.od{background:var(--red-dim);color:#991B1B;border-color:#FCA5A5;}
+.remind-b{font-size:11px;padding:4px 10px;border-radius:999px;background:var(--purple-dim);color:var(--purple);border:1px solid #C4B5FD;font-weight:700;}
+.date-b{font-size:11px;color:var(--text3);font-weight:600;}
+.task-actions{display:flex;gap:2px;flex-shrink:0;}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--text3);padding:8px;border-radius:10px;font-size:18px;line-height:1;min-width:40px;min-height:40px;display:flex;align-items:center;justify-content:center;}
+.icon-btn:active{background:var(--bg);}
+.edit-box{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;display:flex;flex-direction:column;gap:10px;}
+.edit-row{display:flex;gap:8px;flex-wrap:wrap;}
+.edit-row input,.edit-row select,.edit-row textarea{flex:1;font-size:14px;min-width:0;border:1.5px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);padding:0 12px;height:46px;font-weight:600;}
+.edit-row textarea{height:auto;padding:10px 12px;min-height:52px;resize:none;}
+.edit-row input:focus,.edit-row select:focus,.edit-row textarea:focus{outline:none;border-color:var(--green);background:#fff;}
+.edit-field{display:flex;flex-direction:column;gap:5px;flex:1;}
+.edit-field label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;}
+.edit-field input,.edit-field select{height:46px;padding:0 12px;border:1.5px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);font-size:14px;font-weight:600;width:100%;}
+.edit-field input:focus,.edit-field select:focus{outline:none;border-color:var(--green);}
+.save-btn{height:46px;background:var(--green);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;flex:1;}
+.cancel-btn{height:46px;background:none;border:1.5px solid var(--border);border-radius:12px;font-size:15px;cursor:pointer;color:var(--text2);font-weight:600;}
+.del-confirm{margin-top:12px;background:var(--red-dim);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.del-confirm span{font-size:14px;color:var(--red);font-weight:700;}
+.del-yes{background:var(--red);color:#fff;border:none;height:40px;padding:0 20px;border-radius:10px;font-size:14px;cursor:pointer;font-weight:700;}
+.del-no{background:none;border:1.5px solid #FCA5A5;color:var(--red);height:40px;padding:0 16px;border-radius:10px;font-size:14px;cursor:pointer;font-weight:700;}
+
+.notif-bar{display:flex;align-items:center;gap:10px;background:var(--blue-dim);border:1.5px solid #BFDBFE;border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--blue);flex-wrap:wrap;font-weight:600;}
+.notif-bar button{background:var(--green);color:#fff;border:none;padding:8px 18px;border-radius:10px;font-size:13px;cursor:pointer;height:38px;font-weight:700;}
+
+/* ===== PROFILE SCREEN ===== */
+.profile-hero{background:var(--green);padding:28px 20px 40px;text-align:center;}
+.profile-avatar{width:80px;height:80px;border-radius:24px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 14px;border:3px solid rgba(255,255,255,.4);}
+.profile-name{font-size:22px;font-weight:800;color:#fff;}
+.profile-phone{font-size:13px;color:rgba(255,255,255,.7);margin-top:4px;font-weight:600;}
+.profile-body{padding:20px 16px;}
+.profile-card{background:var(--card);border-radius:var(--radius);padding:0;margin-bottom:16px;box-shadow:var(--shadow);overflow:hidden;}
+.profile-row{display:flex;align-items:center;gap:14px;padding:16px;border-bottom:1px solid var(--border);}
+.profile-row:last-child{border-bottom:none;}
+.profile-icon{width:38px;height:38px;border-radius:12px;background:var(--green-dim);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.profile-row-label{font-size:14px;font-weight:700;color:var(--text);flex:1;}
+.profile-row-val{font-size:13px;color:var(--text3);font-weight:600;}
+.logout-big{width:100%;height:54px;background:var(--red-dim);color:var(--red);border:1.5px solid #FCA5A5;border-radius:16px;font-size:16px;font-weight:800;cursor:pointer;margin-top:8px;}
+.logout-big:active{background:#FEE2E2;}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:calc(84px + env(safe-area-inset-bottom) + 12px);left:50%;transform:translateX(-50%);background:var(--text);color:#fff;padding:12px 24px;border-radius:999px;font-size:14px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;z-index:9999;box-shadow:0 4px 24px rgba(0,0,0,.2);}
+.toast.show{opacity:1;}
+
+/* ===== SLOT COLORS ===== */
+.s-wake{background:#FEF3C7;}.s-morning{background:#D1FAE5;}.s-afternoon{background:#DBEAFE;}.s-night{background:#EDE9FE;}
+.b-wake{background:#FEF3C7;color:#92400E;border:none;}.b-morning{background:#D1FAE5;color:#065F46;border:none;}.b-afternoon{background:#DBEAFE;color:#1E40AF;border:none;}.b-night{background:#EDE9FE;color:#5B21B6;border:none;}
+
+/* Smooth transitions */
+.tab-screen{transition:none;}
+</style>
+</head>
+<body>
+
+<!-- ===== AUTH SCREEN ===== -->
+<div id="auth-screen" class="screen active">
+  <div class="auth-hero">
+    <div class="auth-logo-ring">
+      <svg viewBox="0 0 38 38" fill="none"><rect x="4" y="4" width="13" height="13" rx="3" fill="white"/><rect x="21" y="4" width="13" height="13" rx="3" fill="rgba(255,255,255,.6)"/><rect x="4" y="21" width="13" height="13" rx="3" fill="rgba(255,255,255,.6)"/><rect x="21" y="21" width="13" height="13" rx="3" fill="white"/></svg>
+    </div>
+    <div class="auth-brand">GIDUMAN</div>
+    <div class="auth-tagline">Study smarter. Stay on track.</div>
+  </div>
+  <div class="auth-card">
+    <div class="auth-seg">
+      <button class="auth-seg-btn on" id="tab-login" onclick="switchAuthTab('login')">Login</button>
+      <button class="auth-seg-btn" id="tab-register" onclick="switchAuthTab('register')">Register</button>
+    </div>
+    <div id="auth-err" class="auth-err"></div>
+    <div id="auth-suc" class="auth-suc"></div>
+    <!-- LOGIN -->
+    <div id="form-login">
+      <div class="field">
+        <label>Phone Number</label>
+        <div class="phone-row">
+          <div class="phone-prefix">🇪🇹 +251</div>
+          <input type="tel" id="login-phone" placeholder="9xxxxxxxx" maxlength="9" inputmode="numeric"/>
+        </div>
+        <div class="hint">Enter 9-digit number after +251</div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="pwd-wrap">
+          <input type="password" id="login-pwd" placeholder="Your password"/>
+          <button class="pwd-toggle" onclick="togglePwd('login-pwd',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <button class="primary-btn" onclick="doLogin()">Login →</button>
+    </div>
+    <!-- REGISTER -->
+    <div id="form-register" style="display:none;">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="reg-name" placeholder="e.g. Abebe Girma"/>
+      </div>
+      <div class="field">
+        <label>Phone Number</label>
+        <div class="phone-row">
+          <div class="phone-prefix">🇪🇹 +251</div>
+          <input type="tel" id="reg-phone" placeholder="9xxxxxxxx" maxlength="9" inputmode="numeric"/>
+        </div>
+        <div class="hint">Must start with 9 and be 9 digits</div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="pwd-wrap">
+          <input type="password" id="reg-pwd" placeholder="At least 6 characters"/>
+          <button class="pwd-toggle" onclick="togglePwd('reg-pwd',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <div class="pwd-wrap">
+          <input type="password" id="reg-pwd2" placeholder="Repeat password"/>
+          <button class="pwd-toggle" onclick="togglePwd('reg-pwd2',this)" tabindex="-1">👁</button>
+        </div>
+      </div>
+      <button class="primary-btn" onclick="doRegister()">Create Account →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app-screen" class="screen">
+  <div class="toast" id="toast"></div>
+
+  <!-- Header -->
+  <div class="app-header">
+    <div class="header-left">
+      <div class="header-brand">GIDUMAN</div>
+      <div class="header-user" id="nav-user"></div>
+    </div>
+    <div class="header-right">
+      <span class="stat-pill" id="nav-stats">0 tasks</span>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="app-content">
+
+    <!-- STUDY TAB -->
+    <div id="page-study" class="tab-screen">
+      <div class="sec-header">
+        <div>
+          <div class="sec-title">Study Schedule</div>
+          <div class="sec-sub">Ethiopian Time (EAT)</div>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val" id="ss-total">0</div><div class="stat-lbl">Subjects</div></div>
+        <div class="stat-card"><div class="stat-val green" id="ss-done">0</div><div class="stat-lbl">Done</div></div>
+        <div class="stat-card"><div class="stat-val" id="ss-rem">0</div><div class="stat-lbl">Remaining</div></div>
+      </div>
+      <div id="study-slots"></div>
+    </div>
+
+    <!-- TASKS TAB -->
+    <div id="page-tasks" class="tab-screen active">
+      <div class="sec-header">
+        <div>
+          <div class="sec-title">My Tasks</div>
+        </div>
+      </div>
+      <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stat-card"><div class="stat-val" id="s-total">0</div><div class="stat-lbl">Total</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-active">0</div><div class="stat-lbl">Active</div></div>
+        <div class="stat-card"><div class="stat-val green" id="s-done">0</div><div class="stat-lbl">Done</div></div>
+        <div class="stat-card"><div class="stat-val red" id="s-overdue">0</div><div class="stat-lbl">Overdue</div></div>
+      </div>
+      <div class="notif-bar" id="notif-bar" style="display:none;">
+        <span>🔔 Enable notifications for task reminders.</span>
+        <button onclick="requestNotifPerm()">Enable</button>
+      </div>
+      <div class="add-task-card">
+        <div class="add-task-title">Add New Task</div>
+        <input class="task-title-inp" type="text" id="inp-title" placeholder="What do you need to do?"/>
+        <textarea class="task-note-ta" id="inp-note" placeholder="Notes (optional)..." rows="2"></textarea>
+        <div class="field-row" style="margin-bottom:12px;">
+          <select id="inp-pri"><option value="low">Low</option><option value="med" selected>Medium</option><option value="high">High</option></select>
+          <select id="inp-cat"><option value="">Category</option><option value="Work">Work</option><option value="Personal">Personal</option><option value="Shopping">Shopping</option><option value="Health">Health</option><option value="Study">Study</option><option value="Other">Other</option></select>
+        </div>
+        <div class="field-row" style="margin-bottom:12px;">
+          <div class="field-block"><label>Due date &amp; time</label><input type="datetime-local" id="inp-due"/></div>
+          <div class="field-block"><label>Remind me</label><select id="inp-remind"><option value="">No reminder</option><option value="5">5 minutes</option><option value="10">10 min</option><option value="15">15 min</option><option value="30">30 min</option><option value="60">1 hour</option><option value="1440">1 day</option></select></div>
+        </div>
+        <button class="add-task-btn" onclick="addTask()">+ Add Task</button>
+      </div>
+      <div class="chips-row">
+        <button class="chip on" onclick="setFilter('all',this)">All</button>
+        <button class="chip" onclick="setFilter('active',this)">Active</button>
+        <button class="chip" onclick="setFilter('done',this)">Done</button>
+        <button class="chip" onclick="setFilter('overdue',this)">Overdue</button>
+        <button class="chip" onclick="setFilter('high',this)">High</button>
+        <input class="search-inp" type="text" id="search" placeholder="Search..." oninput="renderTasks()"/>
+      </div>
+      <div id="task-list"></div>
+    </div>
+
+    <!-- PROFILE TAB -->
+    <div id="page-profile" class="tab-screen" style="padding:0 0 calc(84px + env(safe-area-inset-bottom));">
+      <div class="profile-hero">
+        <div class="profile-avatar" id="prof-avatar">👤</div>
+        <div class="profile-name" id="prof-name">—</div>
+        <div class="profile-phone" id="prof-phone">—</div>
+      </div>
+      <div class="profile-body">
+        <div class="profile-card">
+          <div class="profile-row">
+            <div class="profile-icon">📚</div>
+            <div class="profile-row-label">Study Schedule</div>
+            <div class="profile-row-val" id="prof-subjects">0 subjects</div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-icon">✅</div>
+            <div class="profile-row-label">Tasks Today</div>
+            <div class="profile-row-val" id="prof-tasks">0 tasks</div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-icon">🕐</div>
+            <div class="profile-row-label">Timezone</div>
+            <div class="profile-row-val">EAT (UTC+3)</div>
+          </div>
+          <div class="profile-row">
+            <div class="profile-icon">📱</div>
+            <div class="profile-row-label">App Version</div>
+            <div class="profile-row-val">v8 Mobile</div>
+          </div>
+        </div>
+        <button class="logout-big" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav">
+    <button class="nav-item" id="nav-study" onclick="switchTab('study')">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" fill="#4B6357"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="#4B6357" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <span class="nav-label">Schedule</span>
+    </button>
+    <button class="nav-item on" id="nav-tasks" onclick="switchTab('tasks')">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="2" rx="1" fill="#8FA898"/><rect x="3" y="11" width="12" height="2" rx="1" fill="#8FA898"/><rect x="3" y="17" width="15" height="2" rx="1" fill="#8FA898"/><circle cx="20" cy="17" r="3" fill="#8FA898"/><path d="M19 17l.7.7 1.3-1.4" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <span class="nav-label">Tasks</span>
+    </button>
+    <button class="nav-item" id="nav-profile" onclick="switchTab('profile')">
+      <div class="nav-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#8FA898"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#8FA898" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <span class="nav-label">Profile</span>
+    </button>
+  </div>
+</div>
+
+<script>
+// ===== AUTH =====
+const USERS_KEY='giduman_users_v1', SESSION_KEY='giduman_session_v1';
+let currentUser=null;
+
+function getUsers(){try{return JSON.parse(localStorage.getItem(USERS_KEY))||{};}catch(e){return{};}}
+function saveUsers(u){localStorage.setItem(USERS_KEY,JSON.stringify(u));}
+function validateEthPhone(p){return/^9[0-9]{8}$/.test(p);}
+
+function togglePwd(id,btn){
+  const inp=document.getElementById(id);
+  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
+  else{inp.type='password';btn.textContent='👁';}
+}
+function switchAuthTab(tab){
+  document.getElementById('tab-login').classList.toggle('on',tab==='login');
+  document.getElementById('tab-register').classList.toggle('on',tab==='register');
+  document.getElementById('form-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('form-register').style.display=tab==='register'?'block':'none';
+  clearAuthMsg();
+}
+function showAuthErr(msg){const e=document.getElementById('auth-err');e.textContent=msg;e.classList.add('show');document.getElementById('auth-suc').classList.remove('show');}
+function showAuthSuc(msg){const s=document.getElementById('auth-suc');s.textContent=msg;s.classList.add('show');document.getElementById('auth-err').classList.remove('show');}
+function clearAuthMsg(){document.getElementById('auth-err').classList.remove('show');document.getElementById('auth-suc').classList.remove('show');}
+
+function doRegister(){
+  const name=document.getElementById('reg-name').value.trim();
+  const phone=document.getElementById('reg-phone').value.trim();
+  const pwd=document.getElementById('reg-pwd').value;
+  const pwd2=document.getElementById('reg-pwd2').value;
+  if(!name)return showAuthErr('Please enter your full name.');
+  if(!validateEthPhone(phone))return showAuthErr('Phone must start with 9 and be 9 digits.');
+  if(pwd.length<6)return showAuthErr('Password must be at least 6 characters.');
+  if(pwd!==pwd2)return showAuthErr('Passwords do not match.');
+  const users=getUsers();
+  if(users[phone])return showAuthErr('This number is already registered. Please login.');
+  users[phone]={name,phone,pwd:btoa(pwd),created:Date.now()};
+  saveUsers(users);
+  showAuthSuc('Account created! You can now login.');
+  setTimeout(()=>switchAuthTab('login'),1500);
+  document.getElementById('login-phone').value=phone;
+}
+
+function doLogin(){
+  const phone=document.getElementById('login-phone').value.trim();
+  const pwd=document.getElementById('login-pwd').value;
+  if(!validateEthPhone(phone))return showAuthErr('Enter a valid 9-digit phone number starting with 9.');
+  if(!pwd)return showAuthErr('Please enter your password.');
+  const users=getUsers();
+  const user=users[phone];
+  if(!user)return showAuthErr('No account found. Please register first.');
+  if(btoa(pwd)!==user.pwd)return showAuthErr('Incorrect password. Please try again.');
+  currentUser={phone:user.phone,name:user.name};
+  localStorage.setItem(SESSION_KEY,JSON.stringify(currentUser));
+  launchApp();
+}
+
+function doLogout(){
+  if(!confirm('Logout from GIDUMAN?'))return;
+  localStorage.removeItem(SESSION_KEY);
+  currentUser=null;
+  tasks=[];filter='all';editingId=null;confirmId=null;nextId=1;subjNextId=1;
+  Object.values(timers).forEach(clearTimeout);
+  studySlots={
+    wake:{name:'Morning Wake Up',icon:'🌅',time:'5:00 AM – 7:00 AM',startTime:'05:00',endTime:'07:00',subjects:[]},
+    morning:{name:'Morning',icon:'☀️',time:'7:00 AM – 12:00 PM',startTime:'07:00',endTime:'12:00',subjects:[]},
+    afternoon:{name:'Afternoon',icon:'🌤',time:'12:00 PM – 5:00 PM',startTime:'12:00',endTime:'17:00',subjects:[]},
+    night:{name:'Night',icon:'🌙',time:'7:00 PM – 11:00 PM',startTime:'19:00',endTime:'23:00',subjects:[]}
+  };
+  resources={wake:'',morning:'',afternoon:'',night:''};
+  document.getElementById('auth-screen').classList.add('active');
+  document.getElementById('app-screen').classList.remove('active');
+  document.getElementById('login-phone').value='';
+  document.getElementById('login-pwd').value='';
+  clearAuthMsg();
+}
+
+function launchApp(){
+  document.getElementById('auth-screen').classList.remove('active');
+  document.getElementById('app-screen').classList.add('active');
+  document.getElementById('nav-user').textContent=currentUser.name+' · +251'+currentUser.phone;
+  loadTasks();loadStudy();
+  checkNotifBar();scheduleAll();renderTasks();renderStudy();
+  updateProfile();
+  switchTab('tasks');
+}
+
+// ===== STORAGE KEYS =====
+function userKey(k){return k+'_'+(currentUser?currentUser.phone:'guest');}
+const SK=()=>userKey('giduman_tasks_v7');
+const SSK=()=>userKey('giduman_study_v7');
+const RK=()=>userKey('giduman_res_v7');
+
+// ===== STATE =====
+let tasks=[],filter='all',editingId=null,confirmId=null,nextId=1;
+let studySlots={
+  wake:{name:'Morning Wake Up',icon:'🌅',time:'5:00 AM – 7:00 AM',startTime:'05:00',endTime:'07:00',subjects:[]},
+  morning:{name:'Morning',icon:'☀️',time:'7:00 AM – 12:00 PM',startTime:'07:00',endTime:'12:00',subjects:[]},
+  afternoon:{name:'Afternoon',icon:'🌤',time:'12:00 PM – 5:00 PM',startTime:'12:00',endTime:'17:00',subjects:[]},
+  night:{name:'Night',icon:'🌙',time:'7:00 PM – 11:00 PM',startTime:'19:00',endTime:'23:00',subjects:[]}
+};
+let resources={wake:'',morning:'',afternoon:'',night:''};
+let subjNextId=1;
+const timers={};
+
+// ===== DATA =====
+function loadTasks(){
+  try{const r=localStorage.getItem(SK());if(r){tasks=JSON.parse(r);nextId=Math.max(...tasks.map(t=>t.id),0)+1;}}catch(e){tasks=[];}
+  if(!tasks.length){tasks=[{id:1,title:'Welcome to GIDUMAN!',note:'Open Study Schedule to add your subjects.',priority:'med',category:'Personal',done:false,created:Date.now(),due:'',remind:''},{id:2,title:'Add subjects to your study schedule',note:'',priority:'high',category:'Study',done:false,created:Date.now()-60000,due:'',remind:''}];nextId=3;saveTasks();}
+}
+function saveTasks(){try{localStorage.setItem(SK(),JSON.stringify(tasks));}catch(e){}}
+function loadStudy(){
+  try{const r=localStorage.getItem(SSK());if(r){const d=JSON.parse(r);Object.keys(d).forEach(k=>{if(studySlots[k]){studySlots[k].subjects=d[k].subjects||[];if(d[k].startTime){studySlots[k].startTime=d[k].startTime;}if(d[k].endTime){studySlots[k].endTime=d[k].endTime;}if(studySlots[k].startTime&&studySlots[k].endTime){studySlots[k].time=fmt12(studySlots[k].startTime)+' – '+fmt12(studySlots[k].endTime);}subjNextId=Math.max(subjNextId,...studySlots[k].subjects.map(s=>s.id||0))+1;}});}}catch(e){}
+  try{const r=localStorage.getItem(RK());if(r){const d=JSON.parse(r);Object.keys(d).forEach(k=>{if(k in resources)resources[k]=d[k];});}}catch(e){}
+}
+function saveStudy(){try{const d={};Object.keys(studySlots).forEach(k=>{d[k]={subjects:studySlots[k].subjects,startTime:studySlots[k].startTime,endTime:studySlots[k].endTime};});localStorage.setItem(SSK(),JSON.stringify(d));}catch(e){}}
+function saveResources(){try{localStorage.setItem(RK(),JSON.stringify(resources));}catch(e){}}
+
+// ===== UTILITIES =====
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function priClass(p){return p==='high'?'pri-h':p==='med'?'pri-m':'pri-l';}
+function priLabel(p){return p==='high'?'High':p==='med'?'Med':'Low';}
+function fmtDue(s){if(!s)return'';const d=new Date(s);return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',timeZone:'Africa/Addis_Ababa'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Africa/Addis_Ababa'})+' EAT';}
+function fmtDate(ts){return new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'Africa/Addis_Ababa'});}
+function remindLabel(v){return{'5':'5 min','10':'10 min','15':'15 min','30':'30 min','60':'1 hr','1440':'1 day'}[v]||'';}
+function getEATNow(){return Date.now();}
+function isOverdue(t){return!t.done&&t.due&&new Date(t.due).getTime()<getEATNow();}
+function fmt12(t){if(!t)return'';const[h,m]=t.split(':').map(Number);const ampm=h>=12?'PM':'AM';const hh=h%12||12;return hh+':'+(m<10?'0':'')+m+' '+ampm;}
+
+// ===== TAB SWITCHING =====
+let currentTab='study';
+function switchTab(tab){
+  currentTab=tab;
+  ['study','tasks','profile'].forEach(t=>{
+    document.getElementById('page-'+t).classList.toggle('active',t===tab);
+    document.getElementById('nav-'+t).classList.toggle('on',t===tab);
+    // update nav label color
+    const lbl=document.getElementById('nav-'+t).querySelector('.nav-label');
+    lbl.style.color=t===tab?'var(--green)':'';
+  });
+  if(tab==='study')renderStudy();
+  if(tab==='tasks')renderTasks();
+  if(tab==='profile')updateProfile();
+}
+
+// ===== PROFILE =====
+function updateProfile(){
+  if(!currentUser)return;
+  const initials=currentUser.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('prof-avatar').textContent=initials||'👤';
+  document.getElementById('prof-name').textContent=currentUser.name;
+  document.getElementById('prof-phone').textContent='+251 '+currentUser.phone;
+  const totalS=Object.values(studySlots).reduce((a,s)=>a+s.subjects.length,0);
+  document.getElementById('prof-subjects').textContent=totalS+' subject'+(totalS!==1?'s':'');
+  document.getElementById('prof-tasks').textContent=tasks.length+' task'+(tasks.length!==1?'s':'');
+}
+
+// ===== NOTIFICATIONS =====
+function checkNotifBar(){const b=document.getElementById('notif-bar');if(typeof Notification!=='undefined'&&Notification.permission==='default')b.style.display='flex';else b.style.display='none';}
+function requestNotifPerm(){if(typeof Notification==='undefined'){toast('Not supported.');return;}Notification.requestPermission().then(p=>{checkNotifBar();if(p==='granted'){toast('Enabled!');scheduleAll();}else toast('Blocked.');});}
+function scheduleAll(){Object.values(timers).forEach(clearTimeout);tasks.forEach(t=>{if(!t.done&&t.due&&t.remind)scheduleReminder(t);});}
+function scheduleReminder(t){if(typeof Notification==='undefined'||Notification.permission!=='granted'||!t.due||!t.remind)return;const delay=new Date(t.due).getTime()-parseInt(t.remind)*60000-Date.now();if(delay<=0)return;if(timers[t.id])clearTimeout(timers[t.id]);timers[t.id]=setTimeout(()=>new Notification('GIDUMAN',{body:t.title+' is due in '+t.remind+' min'}),delay);}
+
+// ===== TASKS =====
+function renderTasks(){
+  const q=((document.getElementById('search')||{}).value||'').toLowerCase();
+  let visible=tasks.filter(t=>{
+    if(filter==='active'&&t.done)return false;
+    if(filter==='done'&&!t.done)return false;
+    if(filter==='overdue'&&!isOverdue(t))return false;
+    if(filter==='high'&&(t.priority!=='high'||t.done))return false;
+    if(q&&!t.title.toLowerCase().includes(q)&&!(t.note||'').toLowerCase().includes(q))return false;
+    return true;
+  });
+  const total=tasks.length,done=tasks.filter(t=>t.done).length,overdue=tasks.filter(t=>isOverdue(t)).length;
+  document.getElementById('s-total').textContent=total;
+  document.getElementById('s-active').textContent=total-done;
+  document.getElementById('s-done').textContent=done;
+  document.getElementById('s-overdue').textContent=overdue;
+  document.getElementById('nav-stats').textContent=total+' task'+(total!==1?'s':'');
+  const list=document.getElementById('task-list');
+  if(!visible.length){list.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div>No tasks found.</div>';return;}
+  list.innerHTML=visible.map(t=>{
+    const od=isOverdue(t);
+    return`<div class="task-card ${t.done?'done-task':''} ${od?'overdue':''}">
+      <div class="task-top">
+        <button class="chk-btn" onclick="toggleDone(${t.id})"><div class="chk-ring ${t.done?'on':''}"></div></button>
+        <div class="task-body">
+          <div class="task-name ${t.done?'crossed':''}">${t.title}</div>
+          ${t.note?`<div class="task-note">${t.note}</div>`:''}
+          <div class="task-meta">
+            <span class="badge ${priClass(t.priority)}">${priLabel(t.priority)}</span>
+            ${t.category?`<span class="badge cat-b">${t.category}</span>`:''}
+            ${t.due?`<span class="time-b ${od?'od':''}">🕐 ${fmtDue(t.due)}${od?' · Late':''}</span>`:''}
+            ${t.remind&&!t.done?`<span class="remind-b">🔔 ${remindLabel(t.remind)}</span>`:''}
+            <span class="date-b">${fmtDate(t.created)}</span>
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="icon-btn" onclick="startEdit(${t.id})">✏️</button>
+          <button class="icon-btn" onclick="askDelete(${t.id})">🗑️</button>
+        </div>
+      </div>
+      ${confirmId===t.id?`<div class="del-confirm"><span>Delete this task?</span><div style="display:flex;gap:8px;"><button class="del-no" onclick="askDelete(${t.id})">Cancel</button><button class="del-yes" onclick="deleteTask(${t.id})">Delete</button></div></div>`:''}
+      ${editingId===t.id?`<div class="edit-box">
+        <div class="edit-row"><input id="et-${t.id}" type="text" value="${t.title.replace(/"/g,'&quot;')}"/></div>
+        <div class="edit-row"><textarea id="en-${t.id}" style="min-height:48px;">${t.note||''}</textarea></div>
+        <div class="edit-row">
+          <select id="ep-${t.id}"><option value="low" ${t.priority==='low'?'selected':''}>Low</option><option value="med" ${t.priority==='med'?'selected':''}>Medium</option><option value="high" ${t.priority==='high'?'selected':''}>High</option></select>
+          <select id="ec-${t.id}"><option value="">No category</option><option value="Work" ${t.category==='Work'?'selected':''}>Work</option><option value="Personal" ${t.category==='Personal'?'selected':''}>Personal</option><option value="Shopping" ${t.category==='Shopping'?'selected':''}>Shopping</option><option value="Health" ${t.category==='Health'?'selected':''}>Health</option><option value="Study" ${t.category==='Study'?'selected':''}>Study</option><option value="Other" ${t.category==='Other'?'selected':''}>Other</option></select>
+        </div>
+        <div class="edit-row">
+          <div class="edit-field"><label>Due date &amp; time</label><input id="ed-${t.id}" type="datetime-local" value="${t.due||''}"/></div>
+          <div class="edit-field"><label>Remind before</label><select id="er2-${t.id}"><option value="">No reminder</option><option value="5" ${t.remind==='5'?'selected':''}>5 min</option><option value="10" ${t.remind==='10'?'selected':''}>10 min</option><option value="15" ${t.remind==='15'?'selected':''}>15 min</option><option value="30" ${t.remind==='30'?'selected':''}>30 min</option><option value="60" ${t.remind==='60'?'selected':''}>1 hour</option><option value="1440" ${t.remind==='1440'?'selected':''}>1 day</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px;"><button class="save-btn" onclick="saveEdit(${t.id})">Save</button><button class="cancel-btn" onclick="startEdit(${t.id})">Cancel</button></div>
+      </div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function addTask(){
+  const title=document.getElementById('inp-title').value.trim();
+  if(!title){document.getElementById('inp-title').focus();return;}
+  const t={id:nextId++,title,note:document.getElementById('inp-note').value.trim(),priority:document.getElementById('inp-pri').value,category:document.getElementById('inp-cat').value,due:document.getElementById('inp-due').value,remind:document.getElementById('inp-remind').value,done:false,created:Date.now()};
+  tasks.unshift(t);
+  document.getElementById('inp-title').value='';document.getElementById('inp-note').value='';document.getElementById('inp-due').value='';document.getElementById('inp-remind').value='';
+  saveTasks();scheduleReminder(t);toast('Task saved!');renderTasks();
+}
+function toggleDone(id){const t=tasks.find(t=>t.id===id);if(t){t.done=!t.done;if(t.done&&timers[id]){clearTimeout(timers[id]);delete timers[id];}saveTasks();renderTasks();}}
+function deleteTask(id){if(timers[id]){clearTimeout(timers[id]);delete timers[id];}tasks=tasks.filter(t=>t.id!==id);confirmId=null;saveTasks();toast('Deleted.');renderTasks();}
+function setFilter(f,btn){filter=f;document.querySelectorAll('.chip').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderTasks();}
+function startEdit(id){editingId=editingId===id?null:id;confirmId=null;renderTasks();}
+function saveEdit(id){
+  const t=tasks.find(t=>t.id===id);if(!t)return;
+  const v=document.getElementById('et-'+id).value.trim();if(!v)return;
+  t.title=v;t.note=document.getElementById('en-'+id).value.trim();t.priority=document.getElementById('ep-'+id).value;t.category=document.getElementById('ec-'+id).value;t.due=document.getElementById('ed-'+id).value;t.remind=document.getElementById('er2-'+id).value;
+  editingId=null;if(timers[id])clearTimeout(timers[id]);if(!t.done)scheduleReminder(t);saveTasks();toast('Updated!');renderTasks();
+}
+function askDelete(id){confirmId=confirmId===id?null:id;editingId=null;renderTasks();}
+
+// ===== STUDY SLOTS =====
+const slotEmojiBg={wake:'s-wake',morning:'s-morning',afternoon:'s-afternoon',night:'s-night'};
+const slotBadge={wake:'b-wake',morning:'b-morning',afternoon:'b-afternoon',night:'b-night'};
+
+function addSubject(k){
+  const n=document.getElementById('sn-'+k).value.trim();if(!n)return;
+  const dur=document.getElementById('sd-'+k).value;
+  studySlots[k].subjects.push({id:subjNextId++,name:n,duration:dur,done:false});
+  document.getElementById('sn-'+k).value='';
+  saveStudy();renderStudy();toast('Subject added!');
+}
+function toggleSubj(k,id){const s=studySlots[k].subjects.find(s=>s.id===id);if(s){s.done=!s.done;saveStudy();renderStudy();}}
+function deleteSubj(k,id){studySlots[k].subjects=studySlots[k].subjects.filter(s=>s.id!==id);saveStudy();renderStudy();toast('Removed.');}
+function saveResource(k){
+  const el=document.getElementById('res-'+k);if(!el)return;
+  resources[k]=el.value;saveResources();
+  const saved=document.getElementById('res-saved-'+k);
+  if(saved){saved.classList.add('show');setTimeout(()=>saved.classList.remove('show'),1500);}
+}
+function saveSlotTime(k){
+  const s=document.getElementById('st-'+k).value;const e=document.getElementById('et2-'+k).value;
+  if(!s||!e){toast('Set both start and end time.');return;}
+  studySlots[k].startTime=s;studySlots[k].endTime=e;studySlots[k].time=fmt12(s)+' – '+fmt12(e);
+  saveStudy();renderStudy();toast('Time updated!');
+}
+
+function renderStudy(){
+  let totalS=0,doneS=0;
+  Object.keys(studySlots).forEach(k=>{totalS+=studySlots[k].subjects.length;doneS+=studySlots[k].subjects.filter(s=>s.done).length;});
+  document.getElementById('ss-total').textContent=totalS;
+  document.getElementById('ss-done').textContent=doneS;
+  document.getElementById('ss-rem').textContent=totalS-doneS;
+
+  document.getElementById('study-slots').innerHTML=Object.keys(studySlots).map(k=>{
+    const sl=studySlots[k];
+    const done=sl.subjects.filter(s=>s.done).length,total=sl.subjects.length;
+    const pct=total>0?Math.round(done/total*100):0;
+    return`<div class="slot-card">
+      <div class="slot-top">
+        <div class="slot-emoji ${slotEmojiBg[k]}">${sl.icon}</div>
+        <div class="slot-info">
+          <div class="slot-name">${sl.name}</div>
+          <div class="slot-time-disp">${sl.time}</div>
+        </div>
+        <span class="slot-badge ${slotBadge[k]}">${done}/${total}</span>
+      </div>
+      <div class="slot-body">
+        <div class="time-edit-row">
+          <label>Start</label>
+          <input type="time" id="st-${k}" value="${sl.startTime||''}"/>
+          <span class="time-sep">–</span>
+          <label>End</label>
+          <input type="time" id="et2-${k}" value="${sl.endTime||''}"/>
+          <button class="time-save-btn" onclick="saveSlotTime('${k}')">Save</button>
+        </div>
+        ${total>0?`<div class="progress-wrap"><div class="progress-fill" style="width:${pct}%"></div></div>`:''}
+        ${sl.subjects.length===0?`<div style="font-size:13px;color:var(--text3);margin-bottom:12px;font-weight:500;">No subjects yet. Add one below.</div>`:''}
+        ${sl.subjects.map(s=>`<div class="subj-row">
+          <div class="subj-check ${s.done?'on':''}" onclick="toggleSubj('${k}',${s.id})"></div>
+          <span class="subj-name ${s.done?'crossed':''}">${s.name}</span>
+          ${s.duration?`<span class="subj-dur">${s.duration}m</span>`:''}
+          <button class="subj-del" onclick="deleteSubj('${k}',${s.id})">×</button>
+        </div>`).join('')}
+        <div class="add-subj">
+          <input id="sn-${k}" type="text" placeholder="Add subject..." onkeydown="if(event.key==='Enter')addSubject('${k}')"/>
+          <input id="sd-${k}" type="number" min="5" max="480" value="30" placeholder="Min" type="number"/>
+          <button class="add-subj-btn" onclick="addSubject('${k}')">+ Add</button>
+        </div>
+        <div class="notes-section">
+          <div class="notes-label">Notes for ${sl.name}</div>
+          <textarea class="notes-ta" id="res-${k}" placeholder="Write resources, notes, links...">${resources[k]||''}</textarea>
+          <div class="notes-actions">
+            <button class="notes-save" onclick="saveResource('${k}')">Save notes</button>
+            <span class="notes-saved" id="res-saved-${k}">Saved!</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.activeElement&&document.activeElement.id==='inp-title')addTask();});
+setInterval(renderTasks,60000);
+
+// ===== SESSION CHECK — must run after all functions & state are defined =====
+(function checkSession(){
+  try{const s=localStorage.getItem(SESSION_KEY);if(s){currentUser=JSON.parse(s);launchApp();}}catch(e){}
+})();
+</script>
+</body>
+</html>
